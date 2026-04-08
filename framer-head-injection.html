@@ -1,0 +1,358 @@
+<!-- ============================================================
+     GDPR Cookie Consent Manager — Framer Head Injection
+     bartknijnenberg.com
+
+     INSTALLATION:
+     1. Copy EVERYTHING in this file
+     2. Framer → Settings → General → Custom Code → Start of <head>
+     3. REMOVE any existing GTM snippet (this script loads GTM itself)
+
+     HOW IT WORKS:
+     ┌─────────────────────────────────────────────────────────┐
+     │ GTM + GA4 → Load ALWAYS                                │
+     │   Without consent: cookieless pings (no cookies)       │
+     │   With analytics consent: full GA4 with cookies        │
+     │                                                        │
+     │ Marketing pixels → BLOCKED until consent               │
+     │   Facebook Pixel, LinkedIn Insight, Google Ads, etc.   │
+     │   Only loaded when user clicks "Accept all" or         │
+     │   enables "Marketing" in preferences                   │
+     └─────────────────────────────────────────────────────────┘
+     ============================================================ -->
+
+<!-- Cookie Consent Styles -->
+<style>
+#bk-consent-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:flex-end;justify-content:center;padding:16px;animation:bk-fadeIn .3s ease;backdrop-filter:blur(2px)}
+#bk-consent-overlay.bk-consent-hiding{animation:bk-fadeOut .3s ease forwards}
+#bk-consent-banner{width:100%;max-width:520px;background:#0D0D0D;border:1px solid rgba(255,255,255,.1);border-radius:16px;box-shadow:0 -4px 40px rgba(0,0,0,.4);overflow:hidden;animation:bk-slideUp .3s ease}
+#bk-consent-overlay.bk-consent-hiding #bk-consent-banner{animation:bk-slideDown .3s ease forwards}
+.bk-consent-inner{padding:28px 28px 20px}
+.bk-consent-header h2{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:20px;font-weight:700;color:#FFF;margin:0 0 8px;line-height:1.3}
+.bk-consent-header p{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:400;color:#9CA3AF;margin:0 0 20px;line-height:1.6}
+.bk-consent-categories{margin-bottom:20px}
+.bk-consent-category{padding:14px 0;border-top:1px solid rgba(255,255,255,.08)}
+.bk-consent-category:last-child{border-bottom:1px solid rgba(255,255,255,.08)}
+.bk-consent-cat-header{display:flex;align-items:flex-start;gap:14px}
+.bk-consent-cat-text{flex:1}
+.bk-consent-cat-text strong{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:15px;font-weight:600;color:#FFF;display:block;margin-bottom:2px}
+.bk-consent-cat-text span{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:400;color:#6B7280;line-height:1.5}
+.bk-consent-toggle{position:relative;display:inline-block;width:44px;min-width:44px;height:24px;margin-top:2px;cursor:pointer}
+.bk-consent-toggle input{opacity:0;width:0;height:0;position:absolute}
+.bk-toggle-slider{position:absolute;inset:0;background:#374151;border-radius:24px;transition:background .2s ease}
+.bk-toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#FFF;border-radius:50%;transition:transform .2s ease}
+.bk-consent-toggle input:checked+.bk-toggle-slider{background:#2563EB}
+.bk-consent-toggle input:checked+.bk-toggle-slider::before{transform:translateX(20px)}
+.bk-toggle-locked{background:#1F2937;cursor:not-allowed}
+.bk-toggle-locked::before{background:#6B7280}
+.bk-consent-toggle input:checked+.bk-toggle-locked{background:#1E40AF;opacity:.6}
+.bk-consent-actions{display:flex;gap:10px;margin-bottom:4px}
+.bk-consent-save{justify-content:center;margin-top:-4px}
+.bk-btn{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:600;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;transition:all .15s ease;flex:1;text-align:center}
+.bk-btn:hover{transform:translateY(-1px)}
+.bk-btn:active{transform:translateY(0)}
+.bk-btn-accept{background:#2563EB;color:#FFF}
+.bk-btn-accept:hover{background:#1D4ED8}
+.bk-btn-reject{background:transparent;color:#9CA3AF;border:1px solid rgba(255,255,255,.15)}
+.bk-btn-reject:hover{background:rgba(255,255,255,.05);color:#FFF}
+.bk-btn-customize{background:rgba(255,255,255,.08);color:#FFF}
+.bk-btn-customize:hover{background:rgba(255,255,255,.12)}
+.bk-consent-footer{text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)}
+.bk-consent-footer a{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;color:#6B7280;text-decoration:none}
+.bk-consent-footer a:hover{color:#9CA3AF;text-decoration:underline}
+@keyframes bk-fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes bk-fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes bk-slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes bk-slideDown{from{transform:translateY(0);opacity:1}to{transform:translateY(20px);opacity:0}}
+@media(max-width:480px){
+  #bk-consent-overlay{padding:8px;align-items:flex-end}
+  #bk-consent-banner{border-radius:14px 14px 0 0;max-width:100%}
+  .bk-consent-inner{padding:22px 18px 16px}
+  .bk-consent-header h2{font-size:18px}
+  .bk-consent-actions{flex-direction:column}
+  .bk-btn{padding:12px 20px}
+}
+</style>
+
+<!-- Cookie Consent Manager Script -->
+<script>
+(function(){
+  'use strict';
+
+  // ============================================================
+  // CONFIGURATION
+  // ============================================================
+  var CONFIG = {
+    gtmId: 'GTM-NPDN3G9K',
+    consentCookieName: 'bk_cookie_consent',
+    consentCookieDays: 365,
+
+    // ┌──────────────────────────────────────────────────────┐
+    // │ MARKETING PIXELS — Add your pixels here              │
+    // │ These ONLY load after user accepts marketing cookies │
+    // └──────────────────────────────────────────────────────┘
+    marketingPixels: [
+      // Facebook Pixel example:
+      // {
+      //   src: 'https://connect.facebook.net/en_US/fbevents.js',
+      //   onLoad: function() {
+      //     fbq('init', 'YOUR_PIXEL_ID');
+      //     fbq('track', 'PageView');
+      //   }
+      // },
+      //
+      // LinkedIn Insight Tag example:
+      // { src: 'https://snap.licdn.com/li.lms-analytics/insight.min.js' },
+      //
+      // Google Ads conversion example:
+      // {
+      //   src: 'https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX',
+      //   onLoad: function() { gtag('config', 'AW-XXXXXXXXX'); }
+      // },
+    ]
+  };
+
+  // ============================================================
+  // TRANSLATIONS (EN/NL auto-detected)
+  // ============================================================
+  var T = {
+    en: {
+      title: 'We value your privacy',
+      desc: 'We use cookies to improve your experience, analyze site traffic, and for marketing purposes. You can choose which cookies to accept.',
+      acceptAll: 'Accept all', rejectAll: 'Reject all', customize: 'Customize', save: 'Save preferences',
+      necessary: 'Necessary', necessaryDesc: 'Essential for the website to function. Cannot be disabled.',
+      analytics: 'Analytics', analyticsDesc: 'Help us understand how visitors use our website (Google Analytics).',
+      marketing: 'Marketing', marketingDesc: 'Used to deliver relevant ads and track campaign performance.',
+      privacy: 'Privacy Policy'
+    },
+    nl: {
+      title: 'We waarderen je privacy',
+      desc: 'We gebruiken cookies om je ervaring te verbeteren, siteverkeer te analyseren en voor marketingdoeleinden. Je kunt kiezen welke cookies je accepteert.',
+      acceptAll: 'Alles accepteren', rejectAll: 'Alles weigeren', customize: 'Aanpassen', save: 'Voorkeuren opslaan',
+      necessary: 'Noodzakelijk', necessaryDesc: 'Essentieel voor de werking van de website. Kan niet uitgeschakeld worden.',
+      analytics: 'Analyse', analyticsDesc: 'Helpen ons begrijpen hoe bezoekers de website gebruiken (Google Analytics).',
+      marketing: 'Marketing', marketingDesc: 'Gebruikt om relevante advertenties te tonen en campagneprestaties te meten.',
+      privacy: 'Privacybeleid'
+    }
+  };
+
+  // ============================================================
+  // 1. GOOGLE CONSENT MODE v2 — Default: deny all
+  //    MUST run before GTM loads
+  // ============================================================
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { window.dataLayer.push(arguments); }
+
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'functionality_storage': 'granted',
+    'personalization_storage': 'denied',
+    'security_storage': 'granted',
+    'wait_for_update': 500
+  });
+
+  // ============================================================
+  // 2. LOAD GTM IMMEDIATELY
+  //    GA4 respects consent mode:
+  //    - denied → cookieless pings (no cookies, GDPR-safe)
+  //    - granted → full tracking with cookies
+  // ============================================================
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',CONFIG.gtmId);
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function lang() {
+    var p = location.pathname;
+    var nl = ['/nl-nl','/over','/diensten','/werk','/contact-nl','/ervaring','/vaardigheden'];
+    for (var i = 0; i < nl.length; i++) { if (p.indexOf(nl[i]) === 0) return 'nl'; }
+    return 'en';
+  }
+
+  function setCookie(val) {
+    var d = new Date();
+    d.setTime(d.getTime() + CONFIG.consentCookieDays * 864e5);
+    document.cookie = CONFIG.consentCookieName + '=' + encodeURIComponent(JSON.stringify(val)) +
+      ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax;Secure';
+  }
+
+  function getCookie() {
+    var n = CONFIG.consentCookieName + '=';
+    var parts = document.cookie.split(';');
+    for (var i = 0; i < parts.length; i++) {
+      var c = parts[i].trim();
+      if (c.indexOf(n) === 0) {
+        try { return JSON.parse(decodeURIComponent(c.substring(n.length))); }
+        catch(e) { return null; }
+      }
+    }
+    return null;
+  }
+
+  function deleteGACookies() {
+    var del = ['_ga','_gid','_gat'];
+    var h = location.hostname;
+    var domains = [h, '.' + h];
+    document.cookie.split(';').forEach(function(c) {
+      var name = c.trim().split('=')[0];
+      if (name.indexOf('_ga_') === 0) del.push(name);
+    });
+    del.forEach(function(name) {
+      domains.forEach(function(d) {
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + d;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+      });
+    });
+  }
+
+  // ============================================================
+  // CONSENT APPLICATION
+  // ============================================================
+  function applyConsent(c) {
+    gtag('consent', 'update', {
+      'analytics_storage': c.analytics ? 'granted' : 'denied',
+      'ad_storage': c.marketing ? 'granted' : 'denied',
+      'ad_user_data': c.marketing ? 'granted' : 'denied',
+      'ad_personalization': c.marketing ? 'granted' : 'denied',
+      'personalization_storage': c.marketing ? 'granted' : 'denied'
+    });
+
+    window.dataLayer.push({
+      'event': 'cookie_consent_update',
+      'cookie_consent_analytics': c.analytics,
+      'cookie_consent_marketing': c.marketing
+    });
+
+    if (!c.analytics) deleteGACookies();
+
+    if (c.marketing) {
+      CONFIG.marketingPixels.forEach(function(px) {
+        var src = px.src || px;
+        if (document.querySelector('script[src="' + src + '"]')) return;
+        var s = document.createElement('script');
+        s.src = src; s.async = true;
+        if (px.onLoad) s.onload = px.onLoad;
+        document.head.appendChild(s);
+      });
+    }
+  }
+
+  // ============================================================
+  // BANNER
+  // ============================================================
+  function showBanner() {
+    var t = T[lang()];
+
+    var overlay = document.createElement('div');
+    overlay.id = 'bk-consent-overlay';
+
+    var b = document.createElement('div');
+    b.id = 'bk-consent-banner';
+    b.setAttribute('role','dialog');
+    b.setAttribute('aria-label',t.title);
+    b.setAttribute('aria-modal','true');
+
+    b.innerHTML =
+      '<div class="bk-consent-inner">' +
+      '<div class="bk-consent-header"><h2>' + t.title + '</h2><p>' + t.desc + '</p></div>' +
+      '<div class="bk-consent-categories" id="bk-cats" style="display:none">' +
+        '<div class="bk-consent-category"><div class="bk-consent-cat-header">' +
+          '<label class="bk-consent-toggle"><input type="checkbox" checked disabled><span class="bk-toggle-slider bk-toggle-locked"></span></label>' +
+          '<div class="bk-consent-cat-text"><strong>' + t.necessary + '</strong><span>' + t.necessaryDesc + '</span></div>' +
+        '</div></div>' +
+        '<div class="bk-consent-category"><div class="bk-consent-cat-header">' +
+          '<label class="bk-consent-toggle"><input type="checkbox" id="bk-chk-analytics"><span class="bk-toggle-slider"></span></label>' +
+          '<div class="bk-consent-cat-text"><strong>' + t.analytics + '</strong><span>' + t.analyticsDesc + '</span></div>' +
+        '</div></div>' +
+        '<div class="bk-consent-category"><div class="bk-consent-cat-header">' +
+          '<label class="bk-consent-toggle"><input type="checkbox" id="bk-chk-marketing"><span class="bk-toggle-slider"></span></label>' +
+          '<div class="bk-consent-cat-text"><strong>' + t.marketing + '</strong><span>' + t.marketingDesc + '</span></div>' +
+        '</div></div>' +
+      '</div>' +
+      '<div class="bk-consent-actions">' +
+        '<button class="bk-btn bk-btn-reject" id="bk-reject">' + t.rejectAll + '</button>' +
+        '<button class="bk-btn bk-btn-customize" id="bk-custom">' + t.customize + '</button>' +
+        '<button class="bk-btn bk-btn-accept" id="bk-accept">' + t.acceptAll + '</button>' +
+      '</div>' +
+      '<div class="bk-consent-actions bk-consent-save" id="bk-save-row" style="display:none">' +
+        '<button class="bk-btn bk-btn-accept" id="bk-save">' + t.save + '</button>' +
+      '</div>' +
+      '<div class="bk-consent-footer"><a href="/privacy-policy">' + t.privacy + '</a></div>' +
+      '</div>';
+
+    overlay.appendChild(b);
+    document.body.appendChild(overlay);
+
+    document.getElementById('bk-accept').onclick = function() {
+      done({ necessary:true, analytics:true, marketing:true });
+    };
+    document.getElementById('bk-reject').onclick = function() {
+      done({ necessary:true, analytics:false, marketing:false });
+    };
+    document.getElementById('bk-custom').onclick = function() {
+      document.getElementById('bk-cats').style.display = 'block';
+      document.getElementById('bk-save-row').style.display = 'flex';
+      this.style.display = 'none';
+    };
+    document.getElementById('bk-save').onclick = function() {
+      done({
+        necessary: true,
+        analytics: document.getElementById('bk-chk-analytics').checked,
+        marketing: document.getElementById('bk-chk-marketing').checked
+      });
+    };
+  }
+
+  function done(consent) {
+    consent.timestamp = new Date().toISOString();
+    setCookie(consent);
+    applyConsent(consent);
+    var o = document.getElementById('bk-consent-overlay');
+    if (o) { o.classList.add('bk-consent-hiding'); setTimeout(function(){ o.remove(); }, 300); }
+  }
+
+  // ============================================================
+  // "MANAGE COOKIES" link support
+  // Add class="manage-cookies" or data-cookie-consent="manage"
+  // to any link/button in your Framer footer
+  // ============================================================
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest('[data-cookie-consent="manage"],.manage-cookies');
+    if (!t) return;
+    e.preventDefault();
+    var existing = getCookie();
+    document.cookie = CONFIG.consentCookieName + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+    showBanner();
+    if (existing) {
+      document.getElementById('bk-cats').style.display = 'block';
+      document.getElementById('bk-save-row').style.display = 'flex';
+      var cb = document.getElementById('bk-custom');
+      if (cb) cb.style.display = 'none';
+      var a = document.getElementById('bk-chk-analytics');
+      var m = document.getElementById('bk-chk-marketing');
+      if (a) a.checked = existing.analytics;
+      if (m) m.checked = existing.marketing;
+    }
+  });
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  var stored = getCookie();
+  if (stored) {
+    applyConsent(stored);
+  } else {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showBanner);
+    } else {
+      showBanner();
+    }
+  }
+})();
+</script>
