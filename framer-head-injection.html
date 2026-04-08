@@ -87,26 +87,44 @@
     consentCookieDays: 365,
 
     // ┌──────────────────────────────────────────────────────┐
-    // │ MARKETING PIXELS — Add your pixels here              │
-    // │ These ONLY load after user accepts marketing cookies │
+    // │ MASTER SWITCH                                        │
+    // │ Set to true when you add your first marketing pixel  │
+    // │ When false: no banner shown, GTM+GA4 run in denied   │
+    // │ mode (cookieless pings only)                         │
+    // └──────────────────────────────────────────────────────┘
+    enabled: false,
+
+    // ┌──────────────────────────────────────────────────────┐
+    // │ MARKETING PIXELS                                     │
+    // │ Uncomment + fill in your IDs when ready              │
+    // │ Then set enabled: true above                         │
     // └──────────────────────────────────────────────────────┘
     marketingPixels: [
-      // Facebook Pixel example:
+      // ── Meta / Facebook Pixel ──────────────────────────
       // {
       //   src: 'https://connect.facebook.net/en_US/fbevents.js',
       //   onLoad: function() {
-      //     fbq('init', 'YOUR_PIXEL_ID');
+      //     fbq('init', 'YOUR_FB_PIXEL_ID');  // ← Replace with your Pixel ID
       //     fbq('track', 'PageView');
       //   }
       // },
-      //
-      // LinkedIn Insight Tag example:
-      // { src: 'https://snap.licdn.com/li.lms-analytics/insight.min.js' },
-      //
-      // Google Ads conversion example:
+
+      // ── LinkedIn Insight Tag ───────────────────────────
       // {
-      //   src: 'https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX',
-      //   onLoad: function() { gtag('config', 'AW-XXXXXXXXX'); }
+      //   src: 'https://snap.licdn.com/li.lms-analytics/insight.min.js',
+      //   onLoad: function() {
+      //     window._linkedin_partner_id = 'YOUR_LINKEDIN_PARTNER_ID';  // ← Replace
+      //     window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+      //     window._linkedin_data_partner_ids.push(window._linkedin_partner_id);
+      //   }
+      // },
+
+      // ── Google Ads Conversion Tracking ─────────────────
+      // {
+      //   src: 'https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX',  // ← Replace
+      //   onLoad: function() {
+      //     gtag('config', 'AW-XXXXXXXXX');  // ← Replace with same ID
+      //   }
       // },
     ]
   };
@@ -344,6 +362,12 @@
   // ============================================================
   // INIT
   // ============================================================
+  if (!CONFIG.enabled) {
+    // Banner disabled — GTM+GA4 still run in denied mode
+    // (cookieless pings only, no cookies, fully GDPR-safe)
+    return;
+  }
+
   var stored = getCookie();
   if (stored) {
     applyConsent(stored);

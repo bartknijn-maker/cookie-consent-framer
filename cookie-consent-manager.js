@@ -34,11 +34,12 @@
     gtmId: 'GTM-NPDN3G9K',
     consentCookieName: 'bk_cookie_consent',
     consentCookieDays: 365,
+    // Master switch — set to true when you add your first marketing pixel
+    enabled: false,
     // Marketing pixels — ONLY loaded after explicit consent
-    // Add your pixel script URLs here:
     marketingPixels: [
-      // { src: 'https://connect.facebook.net/en_US/fbevents.js', onLoad: function() { fbq('init', 'YOUR_PIXEL_ID'); fbq('track', 'PageView'); } },
-      // { src: 'https://snap.licdn.com/li.lms-analytics/insight.min.js' },
+      // { src: 'https://connect.facebook.net/en_US/fbevents.js', onLoad: function() { fbq('init', 'YOUR_FB_PIXEL_ID'); fbq('track', 'PageView'); } },
+      // { src: 'https://snap.licdn.com/li.lms-analytics/insight.min.js', onLoad: function() { window._linkedin_partner_id = 'YOUR_LINKEDIN_PARTNER_ID'; window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || []; window._linkedin_data_partner_ids.push(window._linkedin_partner_id); } },
       // { src: 'https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX', onLoad: function() { gtag('config', 'AW-XXXXXXXXX'); } },
     ]
   };
@@ -382,15 +383,16 @@
   // INITIALIZATION
   // ============================================================
   function init() {
+    if (!CONFIG.enabled) {
+      // Banner disabled — GTM+GA4 still run in denied mode
+      // (cookieless pings only, no cookies, fully GDPR-safe)
+      return;
+    }
+
     var consent = getConsentCookie();
     if (consent) {
-      // User already made a choice — apply consent signals
-      // GTM is already running with 'denied' defaults;
-      // this updates to their stored preferences
       applyConsent(consent);
     } else {
-      // No consent yet — GTM runs in denied mode (cookieless pings)
-      // Show banner to ask for consent
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', createBanner);
       } else {

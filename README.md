@@ -27,6 +27,10 @@ GDPR-proof cookie consent manager voor Framer met Google Consent Mode v2.
 | **Analytics** | Uit | GA4 mag cookies plaatsen (GTM draait altijd) |
 | **Marketing** | Uit | Facebook Pixel, LinkedIn Insight, Google Ads laden |
 
+## Status
+
+De consent banner is standaard **uitgeschakeld** (`enabled: false`). GTM + GA4 draaien in denied mode (cookieless pings). Zodra je marketing pixels toevoegt, zet je `enabled: true` en verschijnt de banner automatisch.
+
 ## Installatie in Framer
 
 ### Stap 1: Code injection
