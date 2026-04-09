@@ -204,13 +204,13 @@
 }
 
 .bk-btn-reject {
-  background: transparent;
-  color: #9CA3AF;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .bk-btn-reject:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.15);
   color: #FFFFFF;
 }
 

@@ -36,6 +36,8 @@
     consentCookieDays: 365,
     // Master switch — set to true when you add your first marketing pixel
     enabled: false,
+    // Consent version — increment when you change cookie policy (forces re-consent)
+    consentVersion: 1,
     // Marketing pixels — ONLY loaded after explicit consent
     marketingPixels: [
       // { src: 'https://connect.facebook.net/en_US/fbevents.js', onLoad: function() { fbq('init', 'YOUR_FB_PIXEL_ID'); fbq('track', 'PageView'); } },
