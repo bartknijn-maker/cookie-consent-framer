@@ -2,20 +2,41 @@
 
 Complete installatiegids voor bartknijnenberg.com via Google Tag Manager (GTM-NPDN3G9K).
 
-## Waarom via GTM?
+## Architectuur
 
-Dit is de meest praktische oplossing omdat:
+De oplossing bestaat uit **twee kleine onderdelen**:
+
+1. **Squarespace header snippet** (~20 regels) — zet Consent Mode v2 defaults vóór GTM laadt
+2. **GTM Custom HTML tag** — banner UI, gebruikersinteractie, consent updates
+
+**Waarom deze splitsing?** Google's officiële richtlijn: `gtag('consent', 'default', ...)` moet vóór GTM laden, niet erbinnen. Wanneer je dit probeert in een GTM Custom HTML tag krijg je de waarschuwing *"gtag-opdrachten in aangepaste HTML werken mogelijk niet naar behoren"*. De defaults-setting is slechts 20 regels code en hoef je maar één keer in Squarespace te plaatsen.
+
+Alle andere logica (banner, consent updates, marketing pixels) blijft in GTM zodat je centraal kunt beheren.
+
+## Waarom deze route?
 
 | Aspect | Voordeel |
 |--------|----------|
-| **Centraal beheer** | Alles in één GTM container — geen Squarespace code injection nodig na setup |
+| **Centraal beheer** | Banner + pixels in GTM, alleen defaults in Squarespace (one-time) |
 | **Versioning** | GTM houdt automatisch versies bij, rollback met één klik |
 | **Preview mode** | Test wijzigingen veilig voordat ze live gaan |
-| **Trigger volgorde** | Consent Initialization trigger garandeert dat defaults worden gezet vóór GA4 of andere tags vuren |
+| **Consent Mode v2 correct** | Defaults vóór GTM = geen timing issues, geen waarschuwingen |
 | **GDPR compliant** | Equivalent aan alle commerciële CMPs (Cookiebot, OneTrust, etc.) |
-| **Onderhoud** | Updates zonder Squarespace of developer |
+| **Onderhoud** | Updates aan banner zonder Squarespace aan te raken |
 
-## Stap 1 — Custom HTML Tag aanmaken
+## Stap 1 — Squarespace Header Snippet
+
+1. Open **Squarespace → Settings → Advanced → Code Injection**
+2. Open `squarespace-head-snippet.html` uit deze repo en kopieer de inhoud
+3. Plak de code in het veld **HEADER**, **boven** de bestaande GTM snippet
+4. Save
+
+Na deze stap:
+- Consent Mode v2 defaults zijn gezet op 'denied'
+- GTM laadt vervolgens en respecteert deze defaults
+- GA4 stuurt cookieless pings (GDPR-safe) tot er consent is
+
+## Stap 2 — GTM Custom HTML Tag aanmaken
 
 1. Open [tagmanager.google.com](https://tagmanager.google.com)
 2. Selecteer container **GTM-NPDN3G9K** (bartknijnenberg.com)
@@ -32,7 +53,16 @@ Dit is de meest praktische oplossing omdat:
 10. **Tag naam**: `Cookie Consent Manager`
 11. **Save**
 
-## Stap 2 — GA4 Configuration Tag updaten
+### Eventuele waarschuwingen bij opslaan
+
+Wanneer je op Save klikt kan GTM twee waarschuwingen tonen:
+
+| Waarschuwing | Betekenis | Actie |
+|--------------|-----------|-------|
+| *"De HTML-code kan een aanroep van document.write() bevatten"* | False positive — GTM scant letterlijk naar de string. Ons script gebruikt het niet. | Klik **Doorgaan** |
+| *"gtag-opdrachten in aangepaste HTML werken mogelijk niet naar behoren"* | Geldt alleen voor `gtag('consent', 'default', ...)`. Onze defaults staan al in de Squarespace header (stap 1). De `gtag('consent', 'update', ...)` die we wel in deze tag gebruiken is officieel ondersteund. | Veilig te negeren |
+
+## Stap 3 — GA4 Configuration Tag updaten
 
 Je bestaande GA4 tag moet Consent Mode v2 respecteren (dit is sinds GA4 standaard, maar dubbelcheck):
 
@@ -45,7 +75,7 @@ Je bestaande GA4 tag moet Consent Mode v2 respecteren (dit is sinds GA4 standaar
 Dit betekent: als `analytics_storage = denied` → GA4 stuurt cookieless pings.
 Als `analytics_storage = granted` → GA4 plaatst cookies en tracked volledig.
 
-## Stap 3 — Marketing tags voorbereiden (optioneel, voor later)
+## Stap 4 — Marketing tags voorbereiden (optioneel, voor later)
 
 Wanneer je marketing pixels gaat toevoegen (LinkedIn, Meta, Google Ads), gebruik je deze trigger:
 
@@ -108,7 +138,7 @@ fbq('track', 'PageView');
 4. Naam: `Meta Pixel`
 5. **Save**
 
-## Stap 4 — "Cookies beheren" link in footer
+## Stap 5 — "Cookies beheren" link in footer
 
 Voeg een link toe aan je Squarespace footer zodat bezoekers hun keuze kunnen wijzigen:
 
@@ -126,7 +156,7 @@ Alternatief: plak een HTML block met:
 <a href="#" class="manage-cookies" style="color:#6B7280;font-size:13px;">Cookies beheren</a>
 ```
 
-## Stap 5 — Testen in Preview Mode
+## Stap 6 — Testen in Preview Mode
 
 1. GTM → **Preview** (rechtsboven)
 2. Voer URL in: `https://www.bartknijnenberg.com`
@@ -140,14 +170,14 @@ Alternatief: plak een HTML block met:
    - Tab **Consent** → alle signalen zouden nu `granted` moeten zijn
 6. Test ook **Reject all** in incognito modus
 
-## Stap 6 — Submit & Publish
+## Stap 7 — Submit & Publish
 
 1. GTM → **Submit** (rechtsboven)
 2. Version name: `Cookie Consent Manager v1`
 3. Description: `GDPR-compliant consent banner with Google Consent Mode v2`
 4. **Publish**
 
-## Stap 7 — Verificatie op productie
+## Stap 8 — Verificatie op productie
 
 1. Bezoek bartknijnenberg.com in incognito
 2. Verifieer dat de banner verschijnt

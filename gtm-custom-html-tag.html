@@ -2,6 +2,11 @@
      GDPR Cookie Consent Manager — GTM Custom HTML Tag
      bartknijnenberg.com
 
+     PREREQUISITE: squarespace-head-snippet.html MUST be installed
+     in Squarespace header ABOVE the GTM snippet. That snippet sets
+     the Consent Mode v2 defaults. This GTM tag only handles the
+     banner UI and consent updates.
+
      INSTALLATION IN GTM:
      1. Open tagmanager.google.com → container GTM-NPDN3G9K
      2. Tags → New → Tag Configuration → Custom HTML
@@ -13,10 +18,11 @@
      8. Save → Submit → Publish
 
      HOW IT WORKS:
-     - Runs on Consent Initialization (before any other tag)
-     - Sets Google Consent Mode v2 defaults to 'denied'
-     - GA4 then sends cookieless pings (GDPR-safe) until consent
-     - Marketing tags in GTM should use trigger:
+     - Consent Mode defaults are set in Squarespace header (before GTM)
+     - This tag runs on Consent Initialization (before any other tag)
+     - On user action: updates consent via dataLayer.push
+     - GA4 respects consent signals (cookieless pings when denied)
+     - Marketing tags in GTM use trigger:
        Custom Event = cookie_consent_update
        AND cookie_consent_marketing = true
      ============================================================ -->
@@ -91,22 +97,12 @@
   };
 
   // ============================================================
-  // 1. GOOGLE CONSENT MODE v2 — Set defaults FIRST
-  //    Runs on Consent Initialization trigger (before other tags)
+  // DATALAYER SETUP
+  // Consent Mode defaults are set in Squarespace header snippet
+  // (before GTM loads). This tag only handles banner + updates.
   // ============================================================
   window.dataLayer = window.dataLayer || [];
   function gtag() { window.dataLayer.push(arguments); }
-
-  gtag('consent', 'default', {
-    'ad_storage': 'denied',
-    'ad_user_data': 'denied',
-    'ad_personalization': 'denied',
-    'analytics_storage': 'denied',
-    'functionality_storage': 'granted',
-    'personalization_storage': 'denied',
-    'security_storage': 'granted',
-    'wait_for_update': 500
-  });
 
   // ============================================================
   // TRANSLATIONS (EN/NL auto-detected)
@@ -187,10 +183,15 @@
 
   // ============================================================
   // CONSENT APPLICATION
-  // Marketing pixels are now managed as GTM tags
-  // They listen for the 'cookie_consent_update' dataLayer event
+  // Uses dataLayer.push directly (GTM-safe — avoids gtag() warning)
+  // Marketing pixels are managed as GTM tags with trigger:
+  //   Custom Event = cookie_consent_update
+  //   AND cookie_consent_marketing = true
   // ============================================================
   function applyConsent(c) {
+    // Update Consent Mode v2 via gtag helper
+    // (gtag('consent', 'update', ...) is the officially supported pattern
+    //  inside GTM Custom HTML tags — the warning only applies to 'default')
     gtag('consent', 'update', {
       'analytics_storage': c.analytics ? 'granted' : 'denied',
       'ad_storage': c.marketing ? 'granted' : 'denied',
@@ -199,6 +200,7 @@
       'personalization_storage': c.marketing ? 'granted' : 'denied'
     });
 
+    // Push custom event so GTM triggers can fire marketing/analytics tags
     window.dataLayer.push({
       'event': 'cookie_consent_update',
       'cookie_consent_analytics': c.analytics,

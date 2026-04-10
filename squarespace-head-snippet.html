@@ -1,0 +1,34 @@
+<!-- ============================================================
+     Google Consent Mode v2 — Defaults
+     bartknijnenberg.com
+
+     PLAATS DEZE CODE IN:
+     Squarespace → Settings → Advanced → Code Injection → HEADER
+     → PLAATS DEZE CODE BOVEN de bestaande GTM-snippet
+
+     Waarom hier en niet in GTM?
+     Google's officiële richtlijn: Consent Mode defaults MOETEN
+     vóór GTM geladen worden. In een GTM Custom HTML tag werkt
+     gtag('consent', 'default', ...) niet betrouwbaar vanwege
+     de manier waarop GTM de dataLayer verwerkt.
+
+     Deze snippet is ~20 regels en laadt instant.
+     ============================================================ -->
+
+<!-- Google Consent Mode v2 — Default: all denied -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'functionality_storage': 'granted',
+    'personalization_storage': 'denied',
+    'security_storage': 'granted',
+    'wait_for_update': 500
+  });
+</script>
+<!-- End Google Consent Mode v2 -->

@@ -43,9 +43,10 @@ Deze route geeft je:
 
 | Bestand | Doel |
 |---------|------|
-| **`gtm-custom-html-tag.html`** | **AANBEVOLEN** — plak dit in een Custom HTML tag in GTM |
-| **`GTM-SETUP.md`** | **AANBEVOLEN** — stap-voor-stap installatiegids voor GTM |
-| `framer-head-injection.html` | Alternatief voor Framer (bevat eigen GTM loader) |
+| **`squarespace-head-snippet.html`** | **STAP 1** — plak in Squarespace header boven GTM (Consent Mode defaults) |
+| **`gtm-custom-html-tag.html`** | **STAP 2** — plak in Custom HTML tag in GTM (banner + logic) |
+| **`GTM-SETUP.md`** | **INSTRUCTIES** — complete stap-voor-stap installatiegids |
+| `framer-head-injection.html` | Alternatief voor Framer (all-in-one, laadt GTM zelf) |
 | `cookie-consent-manager.js` | Standalone JS (reference / development) |
 | `cookie-consent-styles.css` | Standalone CSS (reference / development) |
 
@@ -87,9 +88,11 @@ Automatische taaldetectie op basis van URL pad:
 ## Snelstart
 
 1. Lees [`GTM-SETUP.md`](./GTM-SETUP.md)
-2. Kopieer `gtm-custom-html-tag.html`
-3. Installeer als Custom HTML tag in GTM met Consent Initialization trigger
-4. Test in GTM Preview mode
-5. Publish
+2. Plak `squarespace-head-snippet.html` in Squarespace header (boven GTM)
+3. Plak `gtm-custom-html-tag.html` in een Custom HTML tag in GTM
+4. Trigger: Consent Initialization - All Pages
+5. Update je GA4 tag met Consent Settings
+6. Voeg "Cookies beheren" link toe in de footer
+7. Test in GTM Preview mode → Publish
 
 Voor vragen: zie de troubleshooting sectie in `GTM-SETUP.md`.
